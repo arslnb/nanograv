@@ -12,7 +12,7 @@ var layout = {
   hovermode: 'closest'
 };
 
-$.get("/getalldata", function(data) {
+$.get("/api/data", function(data) {
   graph = document.getElementById("graph");
   Plotly.plot(graph, [{
       name: "Binary Companion",

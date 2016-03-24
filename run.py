@@ -1,39 +1,64 @@
 from flask import Flask, render_template, jsonify
-import json
 import numpy as np
+import json
 
+# Read the given JSON file
 with open('static/data.json') as data_file:
     data = json.load(data_file)
 
+# Initialize Flask
 app = Flask(__name__)
 
+# This route serves the HTML template, loads up script.js in the browser.
+# The script.js file contains code that makes an AJAX call to retrieve the data
+# This keeps the system asynchronous
+
 @app.route("/")
-def hello():
+def home():
     return render_template("output.html")
 
-@app.route('/getalldata')
-def get_alldata():
-    names = []
-    p = []
-    pd = []
-    raw = []
+# This is the route that serves the data to feed the scatterplot
+@app.route('/api/data')
+def get_all_data():
+    # Stores the cursor labels for pulsars without a binary companion
+    no_binary_names = []
+    # Stores period value for pulsars without a binary companion
+    no_binary_periods = []
+    # Stores period derivative value for pulsars without a binary companion
+    no_binary_period_derivative = []
+    # Stores raw files value for pulsars without a binary companion
+    no_binary_raw = []
+    # Stores the cursor labels for pulsars with a binary companion
+    binary_names = []
+    # Stores period value for pulsars with a binary companion
+    binary_periods = []
+    # Stores period derivative value for pulsars with a binary companion
+    binary_period_derivative = []
+    # Stores raw files value for pulsars with a binary companion
+    binary_raw = []
 
-    b_names = []
-    b_p = []
-    b_pd = []
-    b_raw = []
+    # I experimented with using the mean number of raw files for the median size
+    # This didn't work because of the large standard deviation in the data set
+    # This can be fixed, on Plotlys end by taking deviation into account while
+    # calculating a sizeref value.
+    
+    bmean_raw = np.mean(np.array([binary_raw]))
+    mean_raw = np.mean(np.array([no_binary_raw]))
+
     for i in data:
         if i["Binary"] == "Y":
-            b_names.append("Pulsar Name: " + i["Pulsar"])
-            b_p.append(i["Period"])
-            b_pd.append(i["Period Derivative"])
-            b_raw.append(i["Raw Profiles"])
+            binary_names.append("Pulsar Name: " + i["Pulsar"])
+            binary_periods.append(i["Period"])
+            binary_period_derivative.append(i["Period Derivative"])
+            binary_raw.append(i["Raw Profiles"])
         else:
-            names.append("Pulsar Name: " + i["Pulsar"])
-            p.append(i["Period"])
-            pd.append(i["Period Derivative"])
-            raw.append(i["Raw Profiles"])
-    return jsonify(names = names, p = p, pd = pd, raw = raw, b_names = b_names, b_p = b_p, b_pd = b_pd, b_raw = b_raw, bmean_raw = np.mean(np.array([b_raw])), mean_raw = np.mean(np.array([raw])))
+            no_binary_names.append("Pulsar Name: " + i["Pulsar"])
+            no_binary_periods.append(i["Period"])
+            no_binary_period_derivative.append(i["Period Derivative"])
+            no_binary_raw.append(i["Raw Profiles"])
+
+    # Parse this pythonic data to JSON and push to the frontend
+    return jsonify(names = no_binary_names, p = no_binary_periods, pd = no_binary_period_derivative, raw = no_binary_raw, b_names = binary_names, b_p = binary_periods, b_pd = binary_period_derivative, b_raw = binary_raw)
 
 @app.route('/getdata/<field>')
 def get_data(field):
@@ -43,4 +68,4 @@ def get_data(field):
     return ret_arr
 
 if __name__ == "__main__":
-    app.run(debug = True)
+    app.run()
