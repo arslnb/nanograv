@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify
 import numpy as np
-import json
+import json, os
 
 # Read the given JSON file
 with open('static/data.json') as data_file:
@@ -41,7 +41,7 @@ def get_all_data():
     # This didn't work because of the large standard deviation in the data set
     # This can be fixed, on Plotlys end by taking deviation into account while
     # calculating a sizeref value.
-    
+
     bmean_raw = np.mean(np.array([binary_raw]))
     mean_raw = np.mean(np.array([no_binary_raw]))
 
@@ -68,4 +68,4 @@ def get_data(field):
     return ret_arr
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port = int(os.environ.get('PORT', 5000)))
