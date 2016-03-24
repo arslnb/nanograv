@@ -9,6 +9,13 @@ with open('static/data.json') as data_file:
 # Initialize Flask
 app = Flask(__name__)
 
+if os.environ.get('HEROKU') is not None:
+    import logging
+    stream_handler = logging.StreamHandler()
+    app.logger.addHandler(stream_handler)
+    app.logger.setLevel(logging.INFO)
+    app.logger.info('Pulsar Data')
+
 # This route serves the HTML template, loads up script.js in the browser.
 # The script.js file contains code that makes an AJAX call to retrieve the data
 # This keeps the system asynchronous
@@ -42,8 +49,8 @@ def get_all_data():
     # This can be fixed, on Plotlys end by taking deviation into account while
     # calculating a sizeref value.
 
-    bmean_raw = np.mean(np.array([binary_raw]))
-    mean_raw = np.mean(np.array([no_binary_raw]))
+    #bmean_raw = np.mean(np.array([binary_raw]))
+    #mean_raw = np.mean(np.array([no_binary_raw]))
 
     for i in data:
         if i["Binary"] == "Y":
